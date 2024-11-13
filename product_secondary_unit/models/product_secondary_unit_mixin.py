@@ -57,6 +57,7 @@ class ProductSecondaryUnitMixin(models.AbstractModel):
         store=True,
         readonly=False,
         required=True,
+        precompute=True,
     )
 
     @api.depends("secondary_uom_id")
@@ -83,7 +84,7 @@ class ProductSecondaryUnitMixin(models.AbstractModel):
 
     @api.model
     def _get_secondary_uom_qty_depends(self):
-        _fields = ['secondary_uom_factor']
+        _fields = ["secondary_uom_factor"]
         if not self._secondary_unit_fields:
             return _fields
         return _fields + [self._secondary_unit_fields["qty_field"]]
