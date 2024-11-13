@@ -51,26 +51,42 @@ class ProductSecondaryUnitMixin(models.AbstractModel):
         ondelete="restrict",
         default=_get_default_secondary_uom,
     )
+    secondary_uom_factor = fields.Float(
+        string="Secondary Unit Factor",
+        compute="_compute_secondary_uom_factor",
+        store=True,
+        readonly=False,
+        required=True,
+    )
+
+    @api.depends("secondary_uom_id")
+    def _compute_secondary_uom_factor(self):
+        for rec in self:
+            rec.secondary_uom_factor = rec.secondary_uom_id.factor or 1
 
     def _get_uom_line(self):
+        self.ensure_one()
         return self[self._secondary_unit_fields["uom_field"]]
 
     def _get_factor_line(self):
+        self.ensure_one()
         uom_line = self._get_uom_line()
-        return self.secondary_uom_id.factor * (
+        return self.secondary_uom_factor * (
             uom_line.factor
             if self.product_id[self._product_uom_field] != uom_line
             else 1.0
         )
 
     def _get_quantity_from_line(self):
+        self.ensure_one()
         return self[self._secondary_unit_fields["qty_field"]]
 
     @api.model
     def _get_secondary_uom_qty_depends(self):
+        _fields = ['secondary_uom_factor']
         if not self._secondary_unit_fields:
-            return []
-        return [self._secondary_unit_fields["qty_field"]]
+            return _fields
+        return _fields + [self._secondary_unit_fields["qty_field"]]
 
     @api.depends(lambda x: x._get_secondary_uom_qty_depends())
     def _compute_secondary_uom_qty(self):
