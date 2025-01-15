@@ -18,6 +18,9 @@ class TestProductCategoryActive(TransactionCase):
     def test_archive_non_empty_categories(self):
         self.assertTrue(self.uom_categ.active)
         self.assertTrue(self.uom.active)
+        self.uom_categ.active = True
+        self.assertTrue(self.uom_categ.active)
+        self.assertTrue(self.uom.active)
         self.uom_categ.active = False
         self.assertFalse(self.uom_categ.active)
         self.assertFalse(self.uom.active)
